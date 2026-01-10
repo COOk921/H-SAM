@@ -83,7 +83,7 @@ class Backbone(nn.Module):
         b_graph = obs["graph_data"] 
         graph = Batch.from_data_list(b_graph)
         out = self.gat(graph.to(self.device))
-        embedding = out.view(input.shape[0], input.shape[1], -1)
+        embedding = out.view(input_data.shape[0], input_data.shape[1], -1)
         encoded_inputs =  embedding
 
 

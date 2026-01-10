@@ -1,0 +1,2 @@
+order,Time Completed,Event ID,Move Kind,Unit Category,Unit Nbr,From Position,From Slot,To Position,To Slot,Che-Put,Unit Arrival Postion,Unit O/B Actual Visit,Unit POD,Unit POL,Unit Type Height,Unit Type Length,Unit Type ISO,Unit Weight (kg),Unit Position,from_yard,from_bay,from_col,from_layer,Ship_id,to_bay,to_col,to_layer,cluster
+0,25-03-30 2348,UNIT_YARD_MOVE,LOAD,EXPRT,SKLU1552639,Y-TSCT-2A4108.5,2A4108.5,Y-TSCT-Q02,2AA41,R322,T-TJCA3576-2 (TQ),GUANGH_025,KRPUS,CNTSN,NOM86,NOM20,22G1,22310,V-GUANGH_025-110706,2A,41,8,5,V-GUANGH_025,11,7,6,0
