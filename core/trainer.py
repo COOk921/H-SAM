@@ -97,6 +97,25 @@ class PPOTrainer:
                 action, logprob, _, value, _ = self.agent.get_action_and_value_cached(
                     next_obs, state=encoder_state
                 )
+
+                # # --- POMO: Force diverse starting nodes at step 0 ---
+                # if step == 0 and self.config.n_traj > 1:
+                #     # Create range [0, 1, ..., n_traj-1]
+                #     # Ensure n_traj matches the available nodes or is configured correctly
+                #     pomo_action = torch.arange(
+                #         self.config.n_traj, device=self.device
+                #     ).repeat(self.config.num_envs, 1)
+                    
+                #     action = pomo_action
+                    
+                #     # Re-evaluate log_prob for the forced actions
+                #     # Note: We use a temporary forward pass to get log_prob of forced actions
+                #     _, forced_logprob, _, _, _ = self.agent.get_action_and_value_cached(
+                #         next_obs, action=action, state=encoder_state
+                #     )
+                #     logprob = forced_logprob
+                # # ----------------------------------------------------
+                
                 action = action.view(self.config.num_envs, self.config.n_traj)
                 self.values[step] = value.view(self.config.num_envs, self.config.n_traj)
             
