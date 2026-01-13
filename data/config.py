@@ -4,7 +4,7 @@
 
 # --- 路径配置 ---
 INPUT_DIR = './ships/'
-OUTPUT_FILE = './processed_container_data_hetero(new_with_kmeans).pkl'
+OUTPUT_FILE = './processed_container_data_hetero(Spectral_opt).pkl'
 OUTPUT_STATS_FILE = './pipeline_statistics.json'
 VISUALIZATION_OUTPUT_DIR = './visualizations/'
 
@@ -16,7 +16,7 @@ FEATURES_FOR_GRAPH = CONTINUOUS_FEATURES + CATEGORICAL_FEATURES
 
 # --- 聚类算法配置 ---
 # 可选值: 'spectral' (谱聚类) 或 'kmeans' (K-means)
-CLUSTERING_METHOD = 'kmeans'
+CLUSTERING_METHOD = 'spectral'
 
 # --- 谱聚类超参数 ---
 ALPHA = 0.9  # 位置相似度权重

@@ -90,8 +90,7 @@ def compute_affinity_matrix(df, alpha=ALPHA, beta=BETA):
     
     # --- 1. 计算 sim_p (航次相似度) ---
     pod = df['Unit POD'].values
-    yard = df['from_yard'].values
-    sim_p = ((pod[:, None] == pod[None, :]) & (yard[:, None] == yard[None, :])).astype(np.float32)
+    sim_p = ((pod[:, None] == pod[None, :])).astype(np.float32)
     
     # --- 2. 计算 sim_w (重量相似度) ---
     weight = df['Unit Weight (kg)'].values.reshape(-1, 1)
@@ -102,7 +101,7 @@ def compute_affinity_matrix(df, alpha=ALPHA, beta=BETA):
     sim_w = np.exp(-weight_dist_sq / (2 * sigma_w ** 2))
     
     # --- 3. 计算 sim_l (存储位置相似度) ---
-    location_cols = ['from_yard', 'from_bay', 'from_col', 'from_layer']
+    location_cols = ['from_yard', 'from_bay', 'from_col', 'from_layer','Unit POD']
     location_data = df[location_cols].copy()
     
     for col in location_cols:
@@ -117,7 +116,8 @@ def compute_affinity_matrix(df, alpha=ALPHA, beta=BETA):
     sim_l = np.exp(-location_dist_sq / (2 * sigma_l ** 2))
     
     # --- 4. 组合亲和矩阵 ---
-    affinity = sim_p * (alpha * sim_l + beta * sim_w)
+    #affinity = sim_p * (alpha * sim_l + beta * sim_w)
+    affinity =  (alpha * sim_l + beta * sim_w)
     np.fill_diagonal(affinity, 0)
     
     return affinity
@@ -139,15 +139,10 @@ def _spectral_clustering(df, n_clusters):
         n_clusters=n_clusters,
         affinity='precomputed',
         random_state=42,
-        assign_labels='discretize'
+        assign_labels='discretize',
+        n_jobs=-1
     )
-    # spectral = SpectralClustering(
-    #     n_clusters=n_clusters,
-    #     affinity='nearest_neighbors', 
-    #     n_neighbors=100,               
-    #     assign_labels='discretize',
-    #     n_jobs=-1
-    # )
+    
     return spectral.fit_predict(affinity_matrix)
 
 

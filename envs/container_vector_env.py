@@ -23,7 +23,7 @@ _DATA_CACHE = None
 def get_data(
     max_nodes: int,
     current_index: int,
-    data_path: str = "./data/processed_container_data_hetero(old_with_kmeans).pkl",
+    data_path: str = "./data/processed_container_data_hetero(Spectral_opt).pkl",
     mode: str = 'train'
 ) -> Tuple[np.ndarray, Data, int, str]:
     """

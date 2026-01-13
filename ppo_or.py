@@ -202,7 +202,7 @@ def main():
             save_checkpoint(agent, run_name, update)
         
         # Evaluate
-        if update % 3 == 0 or update == config.num_updates:
+        if update % 5 == 0 or update == config.num_updates:
             eval_metrics = evaluator.evaluate(trainer.global_step)
     
     # Cleanup

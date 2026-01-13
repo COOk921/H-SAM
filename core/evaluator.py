@@ -68,8 +68,8 @@ class Evaluator:
                 action, logits = self.agent(test_obs)
             
             # Multi-greedy inference for first step
-            if step == 0 and self.config.multi_greedy_inference:
-                action = self._get_initial_action(action)
+            # if step == 0 and self.config.multi_greedy_inference:
+            #     action = self._get_initial_action(action)
             
             test_obs, reward, _, test_info = self.test_envs.step(action.cpu().numpy())
             trajectories.append(action.cpu().numpy())
