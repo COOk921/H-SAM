@@ -23,7 +23,7 @@ _DATA_CACHE = None
 def get_data(
     max_nodes: int,
     current_index: int,
-    data_path: str = "./data/processed_container_data_hetero(new_with_kmeans).pkl",
+    data_path: str = "./data/processed_container_data_hetero(old_with_kmeans).pkl",
     mode: str = 'train'
 ) -> Tuple[np.ndarray, Data, int, str]:
     """
@@ -144,10 +144,10 @@ def rule_reward(dest_node: np.ndarray, prev_node: np.ndarray) -> np.ndarray:
     reward[valid_condition] = 0
     
     # Sequence reward: correct order
-    # dest_sequence = dest_node[..., 0]
-    # prev_sequence = prev_node[..., 0]
-    # valid_condition = (dest_sequence >= prev_sequence)
-    # reward[valid_condition] = 0
+    dest_sequence = dest_node[..., 0]
+    prev_sequence = prev_node[..., 0]
+    valid_condition = (dest_sequence >= prev_sequence)
+    reward[valid_condition] = 0
 
     return reward
 

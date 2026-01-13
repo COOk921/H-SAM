@@ -4,7 +4,7 @@
 
 import numpy as np
 from sklearn.cluster import SpectralClustering, KMeans
-from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.preprocessing import LabelEncoder, StandardScaler, OneHotEncoder, MinMaxScaler
 from scipy.spatial.distance import cdist
 
 from config import (
@@ -32,20 +32,15 @@ def get_clustering_features(df):
     weight_scaler = StandardScaler()
     weight_scaled = weight_scaler.fit_transform(weight)
     
+    
     # 位置特征
-    location_cols = ['from_yard', 'from_bay', 'from_col', 'from_layer']
-    location_data = df[location_cols].copy()
+    location_cols = ['from_yard', 'from_bay', 'from_col', 'from_layer','Unit POD']
     
-    for col in location_cols:
-        le = LabelEncoder()
-        location_data[col] = le.fit_transform(location_data[col].astype(str))
-    
-    location_values = location_data.values.astype(np.float32)
-    location_scaler = StandardScaler()
-    location_scaled = location_scaler.fit_transform(location_values)
+    encoder = OneHotEncoder(sparse_output=False)
+    encoded_categorical = encoder.fit_transform(df[location_cols])
     
     # 合并特征
-    features = np.hstack([weight_scaled, location_scaled])
+    features = np.hstack([weight_scaled, encoded_categorical])
     
     return features
 
@@ -94,8 +89,9 @@ def compute_affinity_matrix(df, alpha=ALPHA, beta=BETA):
     N = len(df)
     
     # --- 1. 计算 sim_p (航次相似度) ---
-    voyage = df['Unit O/B Actual Visit'].values
-    sim_p = (voyage[:, None] == voyage[None, :]).astype(np.float32)
+    pod = df['Unit POD'].values
+    yard = df['from_yard'].values
+    sim_p = ((pod[:, None] == pod[None, :]) & (yard[:, None] == yard[None, :])).astype(np.float32)
     
     # --- 2. 计算 sim_w (重量相似度) ---
     weight = df['Unit Weight (kg)'].values.reshape(-1, 1)

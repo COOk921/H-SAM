@@ -11,7 +11,7 @@ from sklearn.manifold import TSNE
 
 from config import INPUT_DIR, VISUALIZATION_OUTPUT_DIR, CLUSTERING_METHOD
 from clustering import get_cluster_labels, get_clustering_features, get_method_name
-
+import pdb
 
 def visualize_clusters(csv_path, output_path=None, perplexity=30, random_state=42, method=None):
     """
@@ -35,7 +35,8 @@ def visualize_clusters(csv_path, output_path=None, perplexity=30, random_state=4
     # 读取数据
     print(f"正在读取: {csv_path}")
     df = pd.read_csv(csv_path)
-    
+
+    # pdb.set_trace()
     # 添加 order 列（如果不存在）
     if 'order' not in df.columns:
         df['order'] = range(len(df))
@@ -46,8 +47,9 @@ def visualize_clusters(csv_path, output_path=None, perplexity=30, random_state=4
     df['cluster'] = cluster_labels
     n_clusters = len(np.unique(cluster_labels))
     print(f"聚类完成，共 {n_clusters} 个簇")
-    
+    # pdb.set_trace()
     # 获取特征矩阵
+   
     features = get_clustering_features(df)
     
     # t-SNE 降维
@@ -124,7 +126,11 @@ def visualize_clusters(csv_path, output_path=None, perplexity=30, random_state=4
     # 保存图片
     plt.savefig(output_path, dpi=150, bbox_inches='tight')
     plt.close()
+
     
+    csv_output_path = output_path.replace('.png', '_data.csv')
+    df[['order', 'Unit POD', 'cluster']].to_csv(csv_output_path, index=False)
+    print(f"聚类数据已保存到: {csv_output_path}")
     print(f"可视化已保存到: {output_path}")
     
     return output_path
