@@ -31,10 +31,10 @@ class TrainingConfig:
     env_entry_point: str = "envs.cvrp_vector_env:CVRPVectorEnv"
     
     # Training hyperparameters
-    total_timesteps: int = 5_000_000
+    total_timesteps: int = 15_000_000
     learning_rate: float = 5e-4
     weight_decay: float = 0
-    num_envs: int = 512
+    num_envs: int = 1024
     num_steps: int = 100
     anneal_lr: bool = True
     gamma: float = 0.99

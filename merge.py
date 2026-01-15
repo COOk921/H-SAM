@@ -1,10 +1,10 @@
 import os
 import pandas as pd
 import numpy as np
-from scipy.stats import kendalltau
 from scipy.spatial.distance import cdist
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from itertools import permutations
+from core.metrics import evaluate_correlation_metrics
 
 import pdb
 
@@ -92,33 +92,6 @@ def calculate_inter_group_affinity(df_i, df_j, sigma_w, sigma_l, scaler_w, scale
     
     return affinity
 
-def solve_tsp_path_brute_force(dist_matrix):
-    """
-    遍历所有可能的排列以找到绝对最优解。
-    由于 K 很小，全排列搜索是可行的 (K <= 10)。
-    """
-    K = dist_matrix.shape[0]
-    if K <= 1:
-        return [0]
-    
-    best_path = None
-    min_total_dist = float('inf')
-    
-    # 遍历所有排列
-    for path in permutations(range(K)):
-        current_dist = 0
-        valid_path = True
-        for i in range(K - 1):
-            current_dist += dist_matrix[path[i], path[i+1]]
-            if current_dist >= min_total_dist:
-                valid_path = False
-                break
-        
-        if valid_path and current_dist < min_total_dist:
-            min_total_dist = current_dist
-            best_path = list(path)
-            
-    return best_path
 
 
 def solve_tsp_path_nn(dist_matrix):
@@ -209,7 +182,6 @@ def sort_sub_blocks(df_list):
     # TODO: 这里可以使用 LKH-3 替换 solve_tsp_path_nn 以获得更优解
     sorted_indices = solve_tsp_path_nn(dist_matrix)
     
-    #sorted_indices = solve_tsp_path_brute_force(dist_matrix)
     
     print(f"Computed Order: {sorted_indices}")
     
@@ -263,16 +235,6 @@ def preprocess_and_rerank_pred(sorted_dfs):
 
     return merged_df, random_samples
 
-def evaluate_performance(merged_df, group_key):
-    """
-    3. 性能评估：计算 Kendall's Tau 相关系数。
-    """
-    if merged_df.empty:
-        return 0.0
-    
-    kendall_corr, _ = kendalltau(merged_df['order'].values, merged_df['pred'].values)
-    print(f"Group {group_key} - Single Kendall: {kendall_corr:.4f}")
-    return kendall_corr
 
 def main():
     result_folder = './result/'
@@ -291,6 +253,8 @@ def main():
         file_groups.setdefault(key, []).append(file)
 
     avg_kendall_corr = 0
+    avg_rho_corr = 0
+    avg_rehandle_rate = 0
     all_cluster_row = {}
 
     # 2. 遍历每个组进行处理
@@ -310,9 +274,11 @@ def main():
         # C. 统计与存储
         all_cluster_row[group_key[1:]] = random_rows
         
-        # D. 评估
-        corr = evaluate_performance(merged_df, group_key)
-        avg_kendall_corr += corr
+        # D. 评估 (使用 core/metrics.py 中的函数)
+        kendall_corr, rho_corr, rehandle_rate = evaluate_correlation_metrics(merged_df, group_key)
+        avg_kendall_corr += kendall_corr
+        avg_rho_corr += rho_corr
+        avg_rehandle_rate += rehandle_rate
 
         # E. 保存结果
         merged_file_name = group_key.strip("'") + '\').csv'
@@ -320,8 +286,11 @@ def main():
 
     # 3. 后处理与最终输出
     if file_groups:
-        #process_merged_data(all_cluster_row)
-        print(f"\nOverall Average Kendall: {avg_kendall_corr / len(file_groups):.4f}")
+        num_groups = len(file_groups)
+        print(f"\n{'='*50}")
+        print(f"Overall Average Kendall: {avg_kendall_corr / num_groups:.4f}")
+        print(f"Overall Average Spearman Rho: {avg_rho_corr / num_groups:.4f}")
+        print(f"Overall Average Rehandle Rate: {avg_rehandle_rate / num_groups:.4f}")
     
     # pdb.set_trace()
 

@@ -16,14 +16,19 @@ import torch
 from gym import spaces
 from torch_geometric.data import Data
 
-# Global cache for data
-_DATA_CACHE = None
+
+# Global cache for data (train and test separately)
+_DATA_CACHE = {
+    'train': None,
+    'test': None
+}
 
 
 def get_data(
     max_nodes: int,
     current_index: int,
-    data_path: str = "./data/processed_container_data_hetero(Spectral_opt).pkl",
+    train_data_path: str = "./data/processed_train.pkl",
+    test_data_path: str = "./data/processed_test.pkl",
     mode: str = 'train'
 ) -> Tuple[np.ndarray, Data, int, str]:
     """
@@ -32,7 +37,8 @@ def get_data(
     Args:
         max_nodes: Maximum number of nodes to use
         current_index: Index for test mode
-        data_path: Path to the data file
+        train_data_path: Path to the training data file
+        test_data_path: Path to the test data file
         mode: 'train' or 'test'
         
     Returns:
@@ -40,12 +46,15 @@ def get_data(
     """
     global _DATA_CACHE
     selected_columns = [
-        'order', 'Unit Weight (kg)', 'Unit POD',
-        'from_yard', 'from_bay', 'from_col', 'from_layer'
+        'order', 'Unit Weight (kg)', 'Unit POD', 'from_yard',
+         'from_bay', 'from_col','position_id','from_layer' 
     ]
+    
+    # Select data path based on mode
+    data_path = train_data_path if mode == 'train' else test_data_path
    
-    if _DATA_CACHE is None:
-        print("--- Loading data and dealing with graph (will happen only ONCE) ---")
+    if _DATA_CACHE[mode] is None:
+        print(f"--- Loading {mode} data and dealing with graph (will happen only ONCE per mode) ---")
         with open(data_path, 'rb') as f:
             data = pd.read_pickle(f)
 
@@ -93,9 +102,10 @@ def get_data(
                 )
             data[tuple(key)]['graph'] = batch_g
             
-        _DATA_CACHE = data
-    else:
-        keys = list(_DATA_CACHE.keys())
+        _DATA_CACHE[mode] = data
+    
+    # Get keys from the appropriate cache
+    keys = list(_DATA_CACHE[mode].keys())
 
     # Select key based on mode
     if mode == 'train':
@@ -105,7 +115,7 @@ def get_data(
             current_index = current_index % len(keys)
         key = keys[current_index]
     
-    df = _DATA_CACHE[tuple(key)]
+    df = _DATA_CACHE[mode][tuple(key)]
     
     valid_nodes = np.minimum(df['data'].shape[0], max_nodes)
     nodes = df['data'][selected_columns].to_numpy()[:max_nodes]
@@ -122,7 +132,6 @@ def get_data(
     
     return nodes, graph, valid_nodes, key
 
-
 def rule_reward(dest_node: np.ndarray, prev_node: np.ndarray) -> np.ndarray:
     """
     Calculate rule-based reward.
@@ -137,8 +146,10 @@ def rule_reward(dest_node: np.ndarray, prev_node: np.ndarray) -> np.ndarray:
     batch, n_traj, dim = dest_node.shape
     reward = np.full((batch, n_traj), -1.0)
 
-    # Rule reward: same yard, bay, col and valid layer order
-    condition1 = np.all(dest_node[..., 2:5] == prev_node[..., 2:5], axis=-1)
+   
+    # Rule reward: same yard, bay, col and valid layer order 
+    #condition1 = np.all(dest_node[..., -2] == prev_node[..., -2], axis=-1)
+    condition1 = dest_node[..., -2] == prev_node[..., -2]
     condition2 = dest_node[..., -1] < prev_node[..., -1]
     valid_condition = condition1 & condition2
     reward[valid_condition] = 0
@@ -203,7 +214,7 @@ class ContainerVectorEnv(gym.Env):
         # Default settings
         self.max_nodes = 50
         self.n_traj = 50
-        self.dim = 6 + 2
+        self.dim = 7 + 2
         self.hidden_dim = 256
         self.eval_data = True
         self.eval_partition = "test"

@@ -58,7 +58,7 @@ class Backbone(nn.Module):
             self.problem,
             tanh_clipping
         )
-        self.gat = ContainerHeteroGAT(6, self.embedding_dim, self.embedding_dim)
+        self.gat = ContainerHeteroGAT(7, self.embedding_dim, self.embedding_dim)
 
     def forward(self, obs):
         """Forward pass (not used in current implementation)."""

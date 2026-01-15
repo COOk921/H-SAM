@@ -163,7 +163,6 @@ def _kmeans_clustering(df, n_clusters):
     """
     # 获取特征矩阵
     features = get_clustering_features(df)
-    
     # K-means 聚类
     kmeans = KMeans(
         n_clusters=n_clusters,

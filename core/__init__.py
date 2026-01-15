@@ -9,8 +9,7 @@ from core.config import TrainingConfig, parse_args
 from core.trainer import PPOTrainer
 from core.evaluator import Evaluator
 from core.metrics import (
-    compute_rehandle_rate,
-    calculation_metrics,
+    evaluate_correlation_metrics,
     compute_correlation_metrics,
 )
 
@@ -19,7 +18,6 @@ __all__ = [
     'parse_args',
     'PPOTrainer',
     'Evaluator',
-    'compute_rehandle_rate',
-    'calculation_metrics',
+    'evaluate_correlation_metrics',
     'compute_correlation_metrics',
 ]
