@@ -28,7 +28,7 @@ from core.metrics import evaluate_correlation_metrics
 
 
 # =============================================================================
-# Configuration
+# Configuration 
 # =============================================================================
 class TestConfig:
     """Configuration for test pipeline."""
@@ -41,13 +41,13 @@ class TestConfig:
     
     # Test settings
     num_steps: int = 51
-    num_envs: int = 1
+    num_envs: int = 50
     seed: int = 10
     
     # Output
     result_dir: str = './result/'
     merged_output_dir: str = './result/merged/'
-    save_intermediate: bool = True  # Whether to save per-group CSV files
+    save_intermediate: bool = False  # Whether to save per-group CSV files
 
 
 # =============================================================================
